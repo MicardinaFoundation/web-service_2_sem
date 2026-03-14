@@ -5,6 +5,7 @@ export default defineConfig({
     { path: "/", component: "index" },
     { path: "/docs", component: "docs" },
     { path: "/callbackSend", component: "callbackSend" },
+    { path: "/studentsList", component: "studentsList" },
   ],
   npmClient: 'npm',
 });

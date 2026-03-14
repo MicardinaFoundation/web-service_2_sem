@@ -76,16 +76,22 @@ const ContactForm: React.FC = () => {
       >
         {submittedData && (
           <div>
-            <Text>
-              <strong>Имя:</strong> {submittedData.name}
-            </Text>
-            <Text>
-              <strong>Email:</strong> {submittedData.email}
-            </Text>
-            <Text>
-              <strong>Сообщение:</strong>
-            </Text>
-              {submittedData.message}
+            <div>
+              <Text>
+                <strong>Имя: </strong>{submittedData.name}
+              </Text>
+            </div>
+            <div>
+              <Text>
+                <strong>Email: </strong>{submittedData.email}
+              </Text>
+            </div>
+            <div>
+              <Text>
+                <strong>Сообщение: </strong>
+              </Text>
+                {submittedData.message}
+            </div>
           </div>
         )}
       </Modal>

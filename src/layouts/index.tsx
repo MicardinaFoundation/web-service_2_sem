@@ -16,6 +16,10 @@ const items = [
   {
     key: 'callbackSend',
     label: <Link to="/callbackSend">Обратная связь</Link>
+  },
+  {
+    key: 'studentsList',
+    label: <Link to="/studentsList">Студенческая книга</Link>
   }
 ]
 
