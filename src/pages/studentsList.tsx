@@ -1,69 +1,211 @@
-import React, { useState } from 'react';
-import { Button, Form, Input, message, Modal, Space, Table, TableProps } from 'antd';
-import avatar from '../assets/avatar.png';
-import { studentDataSource } from '@/constants/tableData';
+import React, { useEffect, useState } from 'react';
+import { Button, Form, Input, MenuProps, message, Modal, Popconfirm, Select, Space, Table, TableProps, Typography } from 'antd';
+//import avatar from '../assets/avatar.png';
+import { cathegoriesSource, studentDataSource } from '@/constants/tableData';
+import { request } from '@umijs/max';
+import FormVariantEditor from '@/components/FormVariantEditor';
 //import { studentColumns } from '@/constants/tableColumns';
-
+const { Option } = Select;
 const DocsPage = () => {
-  const [data, setData] = React.useState<Student[]>(studentDataSource);
+  const [data, setData] = React.useState<Variant[]>(studentDataSource);
+  const [options, setOptions] = useState<Category[]>(cathegoriesSource);
   //const [submittedData, setSubmittedData] = useState<Student | null>(null);
-const studentColumns: TableProps<any>['columns'] = [
-  {
-    title: 'Фамилия',
-    dataIndex: 'lastName',
-    key: 'lastName',
-  },
-  {
-    title: 'Имя',
-    dataIndex: 'firstName',
-    key: 'firstName',
-  },
-  {
-    title: 'Отчество',
-    dataIndex: 'midName',
-    key: 'midName',
-  },
-  {
-    title: 'Группа',
-    dataIndex: 'group',
-    key: 'group',
-  },
-  {
-    title: 'Действия',
-    key: 'action',
-    render: (_, record) => <><a onClick={() => handleStudentRemove(record.id)}>Delete</a></>
+  const studentColumns: TableProps<any>['columns'] = [
+    {
+      title: 'Имя',
+      dataIndex: 'name',
+      key: 'name',
+    },
+    {
+      title: 'Фамилия',
+      dataIndex: 'namsName',
+      key: 'namsName',
+    },
+    {
+      title: 'Описание',
+      dataIndex: 'description',
+      key: 'description',
+    },
+    {
+      title: 'Number',
+      dataIndex: 'numb',
+      key: 'numb',
+    },
+    {
+      title: 'GroupId',
+      dataIndex: 'groupId',
+      key: 'groupId',
+      width: 150
+    },
+    {
+      title: 'createdAt',
+      dataIndex: 'createdAt',
+      key: 'numb',
+    },
+    {
+      title: 'updatedAt',
+      dataIndex: 'updatedAt',
+      key: 'updatedAt',
+    },
+    {
+      title: 'Действия',
+      key: 'action',
+      render: (_, record) => <Space>
+        <a onClick={() => handleStudentEditStart(record.id)}>Edit</a>
+        <a onClick={() => handleDiplicate(record.id)}>Diplicate</a>
+        <Popconfirm
+          title="Delete this value?"
+          okText="Yes"
+          onConfirm={() => handleStudentRemove(record.id)}
+          cancelText="No"
+        >
+          <a>Delete</a>
+        </Popconfirm>
+
+
+
+      </Space>
+    }
+  ]
+  const items: MenuProps['items'] = [
+    {
+      key: '0',
+      label: 'Item 1',
+    },
+    {
+      key: '1',
+      label: 'Item 2',
+    },
+    {
+      key: '2',
+      label: 'Item 3',
+    },
+  ];
+  const loadVariants = () => {
+    request('/api/Calculator/GetVariant').then((data: Variant[]) => {
+      ConvertGroupIdToString(data);
+      setData(data);
+    })
   }
-]
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const loadCategories = () => {
+    request('/api/Calculator/CategoriesList').then((data: Category[]) => {
+      setOptions(data);
+    })
+  }
+  function ConvertGroupIdToString(data: Variant[]) {
+    if (options == null) loadCategories;
+    data.forEach((el) => {
+      if (parseInt(el.groupId) < options.length) el.groupId = options[parseInt(el.groupId)].cathegories;
+      else el.groupId = `<NULL GROUP FOR THIS ID> | <ID = ${el.groupId}> <${el.name}>`
+    })
+    return data
+  }
+  useEffect(() => {
+
+    loadCategories();
+    loadVariants();
+
+  }, [])
+  const [isModalCreateOpen, setIsModalCreateOpen] = useState(false);
+  const [isModalEditOpen, setIsModalEditOpen] = useState(false);
 
   const [form] = Form.useForm();
 
   const showModal = () => {
-    setIsModalOpen(true);
+    setIsModalCreateOpen(true);
   };
 
   const handleOk = () => {
-    setIsModalOpen(false);
+    setIsModalCreateOpen(false);
   };
 
-  const handleCancel = () => {
-    setIsModalOpen(false);
-  };
-  const handleSubmit = (values: Student) => {
-    const id = data.length > 0 ? Math.max(...data.map(s => s.id)) : 0;
-
-    values.id = id+1;
-
-    setData([values, ...data])
-    console.log(values);
-    //setSubmittedData(values);
+  const handleCreateCancel = () => {
+    setIsModalCreateOpen(false);
     form.resetFields();
-    setIsModalOpen(false);
+  };
+  const handleEditCancel = () => {
+    setIsModalEditOpen(false);
+    form.resetFields();
+  };
+  const handleSubmit = (values: Variant) => {
+    request('/api/Calculator/', { method: 'PUT', data: values }).then((newRow: Variant) => {
+      setData([newRow, ...data])
+    }).catch(() => {
+
+    }).finally(() => {
+      form.resetFields();
+      setIsModalCreateOpen(false);
+    })
+    // const id = data.length > 0 ? Math.max(...data.map(s => s.id)) : 0;
+
+    // values.id = id+1;
+
+    // setData([values, ...data])
+    // console.log(values);
+    // //setSubmittedData(values);
   };
 
-const handleStudentRemove = (id: number) => {
-  setData(data.filter(x => x.id != id))
-}
+  const handleStudentRemove = (id: number) => {
+    request(`/api/Calculator?id=${id}`, { method: 'DELETE' }).then((newRow: Variant) => {
+      loadVariants();
+    }).catch(() => {
+
+    }).finally(() => {
+      form.resetFields();
+      setIsModalCreateOpen(false);
+    })
+
+
+    setData(data.filter(x => x.id != id))
+  }
+
+  // const handleCategories = () => {
+  //   request(`/api/Calculator/CategoriesList`).then((newRow: Category) => {
+  //     console.log(newRow)
+  //   }).catch(() => {
+
+  //   })
+  // }
+
+
+  const handleStudentEditStart = (id: number) => {
+    request(`/api/Calculator/${id}`).then((data: any) => {
+      form.setFieldsValue(data);
+      console.log(data)
+      setIsModalEditOpen(true);
+    })
+  }
+
+  const handleDiplicate = (id: number) => {
+    request(`/api/Calculator/DiplicateVariant${id}`).then((data: any) => {
+      loadVariants();
+      console.log(data)
+    })
+  }
+
+  const handleStudentEdit = (values: Variant) => {
+    request(`/api/Calculator`, { method: 'PATCH', data: values }).then((newRow: Variant) => {
+      loadVariants();
+      //console.log([newRow, ...data])
+    }).catch(() => {
+
+    }).finally(() => {
+      form.resetFields();
+      setIsModalEditOpen(false);
+    })
+
+
+    //setData(data.filter(x => x.id != id))
+  }
+  const handleSearch = (values: any) => {
+    request(`/api/Calculator`, { method: 'POST', data: values }).then((newRow: Variant[]) => {
+      setData(newRow);
+      //console.log([newRow, ...data])
+    }).catch(() => {
+
+    })
+
+  }
 
   React.useEffect(() => {
     message.info("Students list refresshed");
@@ -72,16 +214,47 @@ const handleStudentRemove = (id: number) => {
   return (
     <div>
       <Space>
-        <Button onClick={() => setIsModalOpen(true)}>Add Student</Button>
+        <Button onClick={() => setIsModalCreateOpen(true)}>Add Student</Button>
         <span>Количество студентов: {data.length}</span>
       </Space>
+      <Form layout='inline' onFinish={handleSearch}>
+        <Form.Item name='name' label='Name'>
+          <Input />
+        </Form.Item>
+        <Form.Item name='namsName' label='namsName'>
+          <Input />
+        </Form.Item>
+
+        <Form.Item name='groupId' label='groupId'>
+          <Select
+            placeholder='Choose'
+
+          >
+
+            {options.map((opt) => (
+              <Option key={opt.idChanged} value={opt.idChanged}>
+                {opt.cathegories}
+              </Option>
+            ))}
+          </Select>
+        </Form.Item>
+
+        <Form.Item>
+          <Button type="primary" htmlType="submit">
+            Find
+          </Button>
+        </Form.Item>
+
+      </Form>
+
       <Table dataSource={data} columns={studentColumns} />;
 
       <Modal
         title="New students"
         closable={{ 'aria-label': 'Custom Close Button' }}
-        open={isModalOpen}
-        onCancel={handleCancel}
+        open={isModalCreateOpen}
+        onOk={() => setIsModalCreateOpen(false)}
+        onCancel={(handleCreateCancel)}
         footer={null}
       >
         <Form
@@ -90,43 +263,53 @@ const handleStudentRemove = (id: number) => {
           onFinish={handleSubmit}
 
         >
-          <Form.Item
-            label="Фамилия"
-            name="lastName"
-            rules={[{ required: true, message: "Введите ваше lastName" }]}
-          >
-            <Input placeholder="Введите lastName" />
+          <FormVariantEditor />
+          <Form.Item name='groupId' label='groupId'>
+            <Select
+              placeholder='Choose'
+            >
+
+              {options.map((opt) => (
+                <Option key={opt.idChanged} value={opt.idChanged}>
+                  {opt.cathegories}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
 
-          <Form.Item
-            label="Имя"
-            name="firstName"
-            rules={[{ required: true, message: "Введите ваше firstName" }]}
-          >
-            <Input placeholder="Введите firstName" />
+        </Form>
+      </Modal>
+      <Modal
+        title="Edit students"
+        closable={{ 'aria-label': 'Custom Close Button' }}
+        open={isModalEditOpen}
+        onCancel={(handleEditCancel)}
+        footer={null}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleStudentEdit}
+
+        >
+          <Form.Item name="id" hidden>
+            <Input />
+          </Form.Item>
+          <FormVariantEditor />
+          <Form.Item name='groupId' label='groupId'>
+            <Select
+              placeholder='Choose'
+
+            >
+
+              {options.map((opt) => (
+                <Option key={opt.idChanged} value={opt.idChanged}>
+                  {opt.cathegories}
+                </Option>
+              ))}
+            </Select>
           </Form.Item>
 
-          <Form.Item
-            label="Отчество"
-            name="midName"
-            rules={[{ required: false, message: "Введите ваше midName" }]}
-          >
-            <Input placeholder="Введите midName" />
-          </Form.Item>
-
-          <Form.Item
-            label="Группа"
-            name="group"
-            rules={[{ required: true, message: "Введите ваше group" }]}
-          >
-            <Input placeholder="Введите group" />
-          </Form.Item>
-
-          <Form.Item>
-            <Button type="primary" htmlType="submit">
-              Отправить
-            </Button>
-          </Form.Item>
         </Form>
       </Modal>
 
