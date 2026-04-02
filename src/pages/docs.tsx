@@ -36,7 +36,7 @@ const [isModalOpen, setIsModalOpen] = useState(false);
         ]}
       >
       <p>
-        <img src={avatar} width="388" />
+        <img src={"avatar"} width="388" />
       </p>
         <p>Аватар создателя</p>
       </Modal>

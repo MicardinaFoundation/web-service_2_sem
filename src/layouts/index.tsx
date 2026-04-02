@@ -1,5 +1,5 @@
 import { Link, Outlet } from 'umi';
-import styles from './index.less';
+//import styles from '../index.less';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
 
 const { Header, Content, Footer } = Layout;
@@ -20,6 +20,10 @@ const items = [
   {
     key: 'studentsList',
     label: <Link to="/studentsList">Студенческая книга</Link>
+  },
+  {
+    key: 'join',
+    label: <Link to="/join">Войти</Link>
   }
 ]
 
