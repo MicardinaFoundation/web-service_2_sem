@@ -1,6 +1,7 @@
 import { Link, Outlet } from 'umi';
 //import styles from '../index.less';
 import { Breadcrumb, Layout, Menu, theme } from 'antd';
+import JoinLogicButton from '@/components/JoinLogicButton';
 
 const { Header, Content, Footer } = Layout;
 
@@ -21,10 +22,10 @@ const items = [
     key: 'studentsList',
     label: <Link to="/studentsList">Студенческая книга</Link>
   },
-  {
-    key: 'join',
-    label: <Link to="/join">Войти</Link>
-  }
+  // {
+  //   key: 'join',
+  //   label: <Link to="/join">Войти</Link>
+  // }
 ]
 
 
@@ -41,6 +42,7 @@ export default function LayoutPage() {
           items={items}
           style={{ flex: 1, minWidth: 0 }}
         />
+        <JoinLogicButton/>
       </Header>
       <Content style={{ padding: '0 48px' }}>
         <Breadcrumb
