@@ -12,7 +12,7 @@ const { options, setOptions } = useModel('variantCathModel');
 
     const loadVariants = () => {
     request('/api/Calculator/GetVariant').then((data: Variant[]) => {
-      ConvertGroupIdToString(data);
+      loadCategories();
       setData(data);
     }).catch((resp: any) => {
       message.error(ErrorHandler(resp.response.status))
@@ -26,14 +26,15 @@ const { options, setOptions } = useModel('variantCathModel');
       message.error(ErrorHandler(resp.response.status))
     })
   }
-  function ConvertGroupIdToString(data: Variant[]) {
-    if (options == null) loadCategories;
-    data.forEach((el) => {
-      if (parseInt(el.groupId) < options.length) el.groupId = options[parseInt(el.groupId)].cathegories;
-      else el.groupId = `<NULL GROUP FOR THIS ID> | <ID = ${el.groupId}> <${el.name}>`
-    })
-    return data
-  }
+  // function ConvertGroupIdToString(data: Variant[]) {
+  //     setCData(data);
+  //   if (options == null) loadCategories;
+  //   // data.forEach((el) => {
+  //   //   if (parseInt(el.groupId) < options.length) el.groupId = options[parseInt(el.groupId)].cathegories;
+  //   //   else el.groupId = `<NULL GROUP FOR THIS ID> | <ID = ${el.groupId}> <${el.name}>`
+  //   // })
+  //   return data
+  // }
 
 
  return { data, setData, loadVariants, loadCategories };

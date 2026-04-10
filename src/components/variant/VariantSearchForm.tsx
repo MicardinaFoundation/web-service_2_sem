@@ -23,14 +23,14 @@ export default function (props: any) {
     return (
         <>
             <Form layout='inline' onFinish={handleSearch}>
-                <Form.Item name='name' label='Name'>
+                <Form.Item name='name' label='Имя'>
                     <Input />
                 </Form.Item>
-                <Form.Item name='namsName' label='namsName'>
+                <Form.Item name='namsName' label='Фамилия'>
                     <Input />
                 </Form.Item>
 
-                <Form.Item name='groupId' label='groupId'>
+                <Form.Item name='groupId' label='Группа'>
                     <Select
                         placeholder='Choose'
                         defaultValue={0}
