@@ -1,7 +1,8 @@
 import { request, useModel } from "@umijs/max";
-import { message, Popconfirm, Space, Table, TableProps } from "antd";
+import { Button, message, Popconfirm, Space, Table, TableProps } from "antd";
 import ErrorHandler from "../ErrorHandler";
 import { Column, Pie } from "@ant-design/charts";
+import * as XLSX from 'xlsx';
 
 export default function (props: any) {
     const { data, setData, loadVariants, loadCategories } = useModel('variantModel');
@@ -122,17 +123,37 @@ export default function (props: any) {
 
     const cleanData = calculateGraphData();
     const config = {
-    data: cleanData,
-    xField: 'type',
-    yField: 'value',
-    colorField: 'type',
-  };
-  <Column {...config} />;
+        data: cleanData,
+        xField: 'type',
+        yField: 'value',
+        colorField: 'type',
+    };
+    <Column {...config} />;
     // const config = {
     //     data: cleanData,
     //     angleField: 'value',
     //     colorField: 'type'
     // }
+
+    const exportDataToXslx = (data: any[]) => {
+
+        const preparedData = data.map(item => ({
+            'Имя': item.name,
+            'Фамилия': item.namsName,
+            'Номер': item.numb,
+            'Описание': item.description,
+            'Группа': item.groupId,
+        }))
+
+
+
+        const worksheet = XLSX.utils.json_to_sheet(preparedData);
+        const workbook = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(workbook, worksheet, 'Data');
+        XLSX.writeFile(workbook, `data(${Date.now()}).xlsx`);
+    }
+
+
 
     const handleDiplicate = (id: number) => {
         request(`/api/Calculator/DiplicateVariant${id}`, { method: 'PUT', data: id }).then((data: any) => {
@@ -145,9 +166,15 @@ export default function (props: any) {
 
     return (
         <>
+            <Space>
+                <Button onClick={() => setIsModalCreateOpen(true)}>Add Student</Button>
+                <span>Количество студентов: {data.length}</span>
+                <Button onClick={() => exportDataToXslx(data)}>Export Contacts</Button>
+            </Space>
+
             <Table dataSource={convData} columns={studentColumns} />;
             {/* <Pie {...config} /> */}
-            <h2>Диаграмма пользователей по группам</h2>
+            <h2>Диаграмма кол-ва пользователей по группам</h2>
             <Column {...config} />;
         </>
     );

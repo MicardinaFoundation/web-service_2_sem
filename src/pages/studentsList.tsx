@@ -10,6 +10,8 @@ import VariantSearchForm from '@/components/variant/VariantSearchForm';
 const DocsPage = () => {
   const { data, setData, loadVariants, loadCategories } = useModel('variantModel');
   const { isModalCreateOpen, setIsModalCreateOpen, handleVariantAdd, handleCreateCancel } = useModel('variantAddModel');
+  const { refresh } = useModel('@@initialState');
+
   useEffect(() => {
     loadVariants();
   }, [])
@@ -29,10 +31,6 @@ const DocsPage = () => {
 
       </Access>
       <Access accessible={access.isAuth}>
-        <Space>
-          <Button onClick={() => setIsModalCreateOpen(true)}>Add Student</Button>
-          <span>Количество студентов: {data.length}</span>
-        </Space>
         <VariantSearchForm />
         <VariantTable />
 

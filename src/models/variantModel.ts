@@ -7,14 +7,21 @@ import React from "react";
 export default () => {
   //const [data, setData] = React.useState<Variant[]>(studentDataSource);
   const [data, setData] = React.useState<Variant[]>([]);
-const { options, setOptions } = useModel('variantCathModel');
+  const { options, setOptions } = useModel('variantCathModel');
+  const { refresh } = useModel('@@initialState');
 
 
-    const loadVariants = () => {
+  const loadVariants = () => {
     request('/api/Calculator/GetVariant').then((data: Variant[]) => {
       loadCategories();
       setData(data);
     }).catch((resp: any) => {
+      if (resp.response.status == 401) {
+        localStorage.removeItem("token");
+        localStorage.removeItem("userName");
+        //console.log('redf');
+        refresh();
+      }
       message.error(ErrorHandler(resp.response.status))
     })
 
@@ -37,5 +44,5 @@ const { options, setOptions } = useModel('variantCathModel');
   // }
 
 
- return { data, setData, loadVariants, loadCategories };
+  return { data, setData, loadVariants, loadCategories };
 };
