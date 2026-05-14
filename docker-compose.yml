@@ -1,0 +1,14 @@
+services:
+  market-panel:
+    container_name: app
+    restart: always
+    build: .
+    ports: 
+      - "127.0.0.1:5305:80"
+    networks: 
+      - studentnet
+
+networks:
+  studentnet:
+    name: studentnet
+    external: true
